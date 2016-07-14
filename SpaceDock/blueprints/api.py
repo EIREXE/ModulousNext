@@ -737,6 +737,8 @@ def update_mod(mod_id):
     db.commit()
     return { 'url': url_for("mods.mod", id=mod.id, mod_name=mod.name), "id": version.id  }
 
+
+
 @api.route('/api/mod/import_gb', methods=['POST'])
 @json_output
 def import_mod():

@@ -12,7 +12,10 @@ mod_followers = Table('mod_followers', Base.metadata,
     Column('mod_id', Integer, ForeignKey('mod.id')),
     Column('user_id', Integer, ForeignKey('user.id')),
 )
-
+mod_tags = Table('mod_tags', Base.metadata,
+    Column('mod_id', Integer, ForeignKey('mod.id')),
+    Column('tag', Integer, ForeignKey('tag.id')),
+)
 class Featured(Base):
     __tablename__ = 'featured'
     id = Column(Integer, primary_key = True)
@@ -272,6 +275,7 @@ class Mod(Base):
     background = Column(String(512))
     bgOffsetX = Column(Integer)
     bgOffsetY = Column(Integer)
+    #tags = relationship('Tag', viewonly=True, secondary=mod_tags, backref='mod.id')
     medias = relationship('Media')
     default_version_id = Column(Integer)
     versions = relationship('ModVersion', order_by="desc(ModVersion.sort_index)")
@@ -542,3 +546,12 @@ class GameVersion(Base):
             'friendly_version': self.friendly_version,
             'game_id': self.game_id,
         }
+
+class Tag(Base):
+    __tablename__ = 'tag'
+    id = Column(Integer, primary_key=True)
+    name = Column(String(512))
+    mods = relationship('Mod', order_by="Mod.created", secondary=mod_tags, backref='tags')
+
+    def __init__(self, name):
+        self.name = name
