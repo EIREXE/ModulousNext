@@ -737,35 +737,90 @@ def update_mod(mod_id):
     db.commit()
     return { 'url': url_for("mods.mod", id=mod.id, mod_name=mod.name), "id": version.id  }
 
-@api.route('/api/mod/<mod_id>/add_tag', methods=['POST'])
+@api.route('/api/mod/import_gb', methods=['POST'])
 @json_output
-def add_tag(mod_id):
-    tag = request.form.get('tag')
-    if not tag:
-        return { 'error': True, 'reason': 'Tag is empty.' }, 401
+def import_mod():
     if not current_user:
         return { 'error': True, 'reason': 'You are not logged in.' }, 401
-    mod = Mod.query.filter(Mod.id == mod_id).first()
-    if not mod:
-        return { 'error': True, 'reason': 'Mod not found.' }, 404
-    editable = False
-    if current_user:
-        if current_user.admin:
-            editable = True
-        if current_user.id == mod.user_id:
-            editable = True
-        if any([u.accepted and u.user == current_user for u in mod.shared_authors]):
-            editable = True
-    new_tag = Tag.query.filter(Tag.name == tag.lower()).first()
-    if new_tag:
-        if not new_tag in mod.tags:
-            print("add tag")
-            new_tag.mods.append(mod)
-    else:
-        new_tag = Tag(tag.lower())
-        db.add(new_tag)
-        db.flush()
-        db.commit()
-        mod.tags.append(new_tag)
+    if not current_user.public:
+        return { 'error': True, 'reason': 'Only users with public profiles may create mods.' }, 403
+    game = request.form.get('game')
+    link = request.form.get('link')
+    version = request.form.get('version')
+    game_version = request.form.get('game-version')
+    license = request.form.get('license')
+    print(game,link,version,game_version,license)
+    #ckan = request.form.get('ckan')
+    #zipball = request.files.get('zipball')
+    # Validate
+    if not link \
+        or not version \
+        or not game \
+        or not game_version \
+        or not license:
+        return { 'error': True, 'reason': 'All fields are required.' }, 400
+    # Validation, continued
+
+    test_game = Game.query.filter(Game.id == game).first()
+    if not test_game:
+        return { 'error': True, 'reason': 'Game does not exist.' }, 400
+    print(test_game)
+    test_gameversion = GameVersion.query.filter(GameVersion.game_id == test_game.id).first()
+    if not test_gameversion:
+        return { 'error': True, 'reason': 'Game version does not exist.' }, 400
+    game_version_id = test_gameversion.id
+    mod = Mod()
+    try:
+        gb_mod = GbMod.load_from_url(link)
+    except Exception as e:
+        return { 'error': True, 'reason':  e.args[0]}, 400
+    if len(gb_mod.name) > 100:
+        return { 'error': True, 'reason': 'Mod name is too long, should be 100 character or less' }, 400
+    if len(license) > 128:
+        return { 'error': True, 'reason': 'License is too long, should be 128 character or less' }, 400
+    test_mod = Mod.query.filter(Mod.banana_id == gb_mod.id).first()
+
+    if test_mod:
+        print("test mod")
+        return { 'url': "/gb_verification/" + str(test_mod.id), "id": test_mod.id, "name": test_mod.name, "verification": mod.banana_verification }
+    mod.banana_verified = False
+    mod.banana_verification = uuid.uuid4().hex
+    mod.banana_id = gb_mod.id
+    mod.banana_url = link
+    mod.name = gb_mod.name
+    name = gb_mod.name
+    mod.user = current_user
+    mod.name = gb_mod.name
+    mod.game_id = game
+    mod.description = default_description
+    mod.ckan = False
+    mod.license = license
+    # Save zipball
+    filename = secure_filename(name) + '-' + secure_filename(version) + '.zip'
+    base_path = os.path.join(secure_filename(current_user.username) + '_' + str(current_user.id), secure_filename(mod.name))
+    full_path = os.path.join(_cfg('storage'), base_path)
+    if not os.path.exists(full_path):
+        os.makedirs(full_path)
+    path = os.path.join(full_path, filename)
+    if os.path.isfile(path):
+        # We already have this version
+        # We'll remove it because the only reason it could be here on creation is an error
+        os.remove(path)
+    #zipball.save(path)
+    #if not zipfile.is_zipfile(path):
+    #    os.remove(path)
+    #    return { 'error': True, 'reason': 'This is not a valid zip file.' }, 400
+    version = ModVersion(secure_filename(version), game_version_id, os.path.join(base_path, filename), False)
+    mod.versions.append(version)
+    db.add(version)
+    # Save database entry
+    db.add(mod)
     db.commit()
-    return { 'url': url_for("mods.mod", id=mod.id, mod_name=mod.name) }
+    mod.default_version_id = version.id
+    db.commit()
+    ga = Game.query.filter(Game.id == game).first()
+    session['game'] = ga.id;
+    session['gamename'] = ga.name;
+    session['gameshort'] = ga.short;
+    session['gameid'] = ga.id;
+    return { 'url': "/gb_verification/" + str(mod.id), "id": mod.id, "name": mod.name, "verification": mod.banana_verification }

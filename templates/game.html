@@ -152,7 +152,7 @@
                              style="  ">
             <span>
                 <h1 style="font-size: 6mm; margin: 0; padding: 0;color: #FFFFFF;">{{ mod.name }}</h1>
-                <div class="ms-author" style="color: #337AB7;display: inline;">by somename</div>
+                <div class="ms-author" style="color: #337AB7;display: inline;">by {{mod.user.username}}</div>
                 <div class="ms-version"
                      style="color: #337AB7;display: inline;">for&nbsp;{{ mod.default_version().gameversion.friendly_version }}</div>
                 <p style="color: #296394;">{{ mod.short_description }}</p>
@@ -198,8 +198,7 @@
 
 
     <style>
-        .listview {
-            width: 50%;
+        .wlistview {
             margin: 2.5mm;
         }
 
@@ -303,7 +302,7 @@
                         </div>
                         <div class="listitemtext">
                             <h4 style="color:#333333;">{{ mod.name }}</h4>
-                            <span class="ms-author" style="color: #337AB7;">by somename</span>
+                            <span class="ms-author" style="color: #337AB7;">by {{mod.user.username}}</span>
                             <span class="ms-version"
                                   style="color: #337AB7;">for&nbsp;{{ mod.default_version().gameversion.friendly_version }}</span>
                             <p style="color: #296394;">{{ mod.short_description }}</p>
@@ -332,7 +331,7 @@
                         </div>
                         <div class="listitemtext" style="overflow: hidden;text-overflow: ellipsis;">
                             <h4 style="color:#333333;">{{ mod.name }}</h4>
-                            <span class="ms-author" style="color: #337AB7;">by somename</span>
+                            <span class="ms-author" style="color: #337AB7;">by {{mod.user.username}}</span>
                             <span class="ms-version"
                                   style="color: #337AB7;">for&nbsp;{{ mod.default_version().gameversion.friendly_version }}</span>
                             <p style="color: #296394;overflow: hidden;text-overflow: ellipsis;">{{ mod.short_description }}</p>
@@ -362,7 +361,7 @@
                         </div>
                         <div class="listitemtext">
                             <h4 style="color:#333333;">{{ mod.name }}</h4>
-                            <span class="ms-author" style="color: #337AB7;">by somename</span>
+                            <span class="ms-author" style="color: #337AB7;">by {{mod.user.username}}</span>
                             <span class="ms-version"
                                   style="color: #337AB7;">for&nbsp;{{ mod.default_version().gameversion.friendly_version }}</span>
                             <p style="color: #296394;">{{ mod.short_description }}</p>

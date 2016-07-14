@@ -53,14 +53,14 @@
                 {% if admin %}
                     {% if not featured%}
                                 <li style="padding:1.25mm 2.5mm 1.25mm  2.5mm;">
-                                    <a data-mod="{{ mod.id }} href="#">
+                                    <a data-mod="{{ mod.id }}" href="/feature/{{mod.id}}">
                                         <span class="glyphicon glyphicon-fire"></span>&nbsp;&nbsp;Feature this mod
                                     </a>
                                 </li>
 
                     {% else %}
                                 <li style="padding:1.25mm 2.5mm 1.25mm  2.5mm;">
-                                    <a data-mod="{{ mod.id }} href="#">
+                                    <a data-mod="{{ mod.id }}" href="#">
                                         <span class="glyphicon glyphicon-fire"></span>&nbsp;&nbsp;Remove Feature
                                     </a>
                                 </li>

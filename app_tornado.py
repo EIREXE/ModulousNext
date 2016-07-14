@@ -6,6 +6,11 @@ from SpaceDock.app import app
 from SpaceDock.app import app
 
 if __name__ == '__main__':
-    http_server = HTTPServer(WSGIContainer(app))
-    http_server.listen(_cfgi("debug-port"), address=_cfg("debug-host"))
-    IOLoop.instance().start()
+    try:
+        http_server = HTTPServer(WSGIContainer(app))
+        http_server.bind(_cfgi("debug-port"))
+        http_server.start(0)
+        IOLoop.instance().start()
+
+    except:
+        tornado.ioloop.IOLoop.instance().stop()

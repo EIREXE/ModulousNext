@@ -774,7 +774,7 @@ def autoupdate(mod_id):
     send_autoupdate_notification(mod)
     return redirect(url_for("mods.mod", id=mod.id, mod_name=mod.name,ga=game))
 
-@mods.route('/gb_verification/<int:mod_id>', methods=['GET'])
+"""@mods.route('/gb_verification/<int:mod_id>', methods=['GET'])
 @with_session
 @loginrequired
 def gb_verification(mod_id):
@@ -821,8 +821,9 @@ def verify_gb(mod_id):
     full_path = os.path.join(_cfg('storage'), base_path)
     type_thing = mod.banana_url.split('/')[-2]
     filename = secure_filename(mod.name) + '-' + secure_filename(mod.versions[0].friendly_version) + '.zip'
-    download(["http://files.gamebanana.com/" + type_thing + "/" + gb_mod.file_path], full_path, filename, mod)
-
+    #download(["http://files.gamebanana.com/" + type_thing + "/" + gb_mod.file_path], full_path, filename, mod)
+    thrd = threading.Thread(target=download, args=(["http://files.gamebanana.com/" + type_thing + "/" + gb_mod.file_path], full_path, filename, mod))
+    thrd.start()
     gb_filename = None
     if gb_mod.render:
         gb_filename = gb_mod.render
@@ -839,7 +840,9 @@ def verify_gb(mod_id):
         os.remove(os.path.join(_cfg('storage'), mod.background))
     except:
         pass # who cares
-    download(["http://files.gamebanana.com/img/ss/" + type_thing + "/" + gb_filename], full_path, filename, mod)
+    thr = threading.Thread(target=download, args=(["http://files.gamebanana.com/img/ss/" + type_thing + "/" + gb_filename], full_path, filename, mod))
+    thr.start()
+    #download(["http://files.gamebanana.com/img/ss/" + type_thing + "/" + gb_filename], full_path, filename, mod)
     mod.background = os.path.join("/content/" + base_path, filename)
     mod.banana_verified = True
     return redirect("/mod/import-success")
@@ -880,3 +883,4 @@ def download(urls, destfolder, name, mod, numthreads=4):
         t.start()
 
     queue.join()
+"""
