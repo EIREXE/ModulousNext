@@ -623,8 +623,7 @@ def create_mod():
     test_game = Game.query.filter(Game.id == game).first()
     if not test_game:
         return { 'error': True, 'reason': 'Game does not exist.' }, 400
-    print(test_game)
-    test_gameversion = GameVersion.query.filter(GameVersion.game_id == test_game.id).first()
+    test_gameversion = GameVersion.query.filter(GameVersion.game_id == test_game.id).filter(GameVersion.friendly_version == game_version).first()
     if not test_gameversion:
         return { 'error': True, 'reason': 'Game version does not exist.' }, 400
     game_version_id = test_gameversion.id
