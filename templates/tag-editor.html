@@ -1,1 +1,18 @@
- <span class="label label-info">{{tag}} {% if editable %}X{% endif %}</span>
+<link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='tags.css') }}" />
+		<b style="font-size: 12px;">Tags</b>
+		<ul id="tag-sidebar">
+      {% for tag in mod.tags %}
+      <li class="tag-type-general" name="tags_location" id="tags_location">
+        {% if editable %}
+        <a href="">X</a>
+        {% endif %}
+        <a href="/{{ga.short}}/search?query={{tag.name}}">{{tag.name}}</a>
+         <span style="color: #a0a0a0;">{{len(tag.mods)}}</span>
+      </li>
+      {% endfor %}
+    </ul>
+    {% if editable %}
+    <div class="form-group">
+  <input placeholder="New tag..." type="text" class="form-control" id="new_tag" name="new_tag">
+</div>
+{% endif %}

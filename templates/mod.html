@@ -7,6 +7,7 @@
 {% endblock %}
 {% block scripts %}
 <script src="/static/mods.js"></script>
+<script src="https://rawgit.com/notifyjs/notifyjs/master/dist/notify.js"></script>
  <script language="JavaScript">
      $( document ).ready(function() {
          $('#vname').change(function () {
@@ -22,6 +23,41 @@
     });
 
  </script>
+ {% if editable %}
+ <script type="text/javascript">
+ $( document ).ready(function() {
+   $("#new_tag").keyup(function (e) {
+      if (e.keyCode == 13) {
+        if ($("#new_tag").val() == ""){
+          $.notify("Tag is empty!", { position:"bottom center" });
+        }
+        else {
+          $.ajax({ // ajax call starts
+            type: "POST",
+            url: "/api/mod/{{mod.id}}/add_tag", // JQuery loads serverside.php
+            data: 'tag=' + $("#new_tag").val(), // Send value of the clicked button
+            dataType: 'json', // Choosing a JSON datatype
+          }).done(function(data){
+            $.notify(data.reason, { position:"bottom center" }, "success");
+            $('#tags_location').prepend(
+"              <a href=\"\/api\/mod\/" + data.mod_id +"\/remove_tag\">X<\/a>\r\n\r\n              <a href=\"searchurl\">" + $("#new_tag").val() + "<\/a>\r\n               <span style=\"color: #a0a0a0;\">" + data.length + "<\/span>\r\n            <\/li>"
+            )
+          }).fail(function(data){
+            var a_data = $.parseJSON(data.responseText)
+            $.notify(a_data.reason, { position:"bottom center" }, "error");
+          })
+        }
+      }
+   });
+
+   function notify(error, data){
+     $.notify(data.reason, { position:"bottom center", className: 'success' });
+   }
+ });
+
+
+ </script>
+{% endif %}
 {% endblock %}
 {% block pagenav %}
     {% if editable %}
@@ -345,6 +381,11 @@ window.thirty_days_ago = new Date({{ thirty_days_ago | tojson }});
         {% endif %}
 {% endif %}
 
+
+
+
+<div class="row">
+<div class="col-md-12">
 <div class="tab-container">
     <div class="mod-tabs container">
         <a data-toggle="tab" href="#info" class="btn btn-primary">Information</a>
@@ -352,8 +393,13 @@ window.thirty_days_ago = new Date({{ thirty_days_ago | tojson }});
         <a data-toggle="tab" href="#stats" class="btn btn-info">Stats</a>
     </div>
 </div>
+</div>
 
+</div>
+<div class="row">
+  <div class="col-md-10">
 <div class="container">
+  <div class="row">
     <div class="tab-content">
         <div class="tab-pane active space-left-right" id="info">
             {{ mod.description | markdown }}
@@ -431,6 +477,13 @@ window.thirty_days_ago = new Date({{ thirty_days_ago | tojson }});
             </div>
         </div>
     </div>
+</div>
+</div>
+</div>
+<div class="col-md-2">
+  <div class="container">
+    {% include "tag-editor.html" %}
+  </div>
 </div>
 {% if editable %}
 <div class="modal fade" id="confirm-delete" tabindex="-1" role="dialog" aria-labelledby="confirm-delete" aria-hidden="true">
@@ -568,4 +621,9 @@ window.thirty_days_ago = new Date({{ thirty_days_ago | tojson }});
         </div>
     </div>
 </div>
+{% endblock %}
+
+{% block sidebar %}
+
+
 {% endblock %}

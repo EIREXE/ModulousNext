@@ -3,7 +3,6 @@
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
 
     <link rel="stylesheet" href="/static/font-awesome.min.css">
     <link rel="search" type="application/opensearchdescription+xml" title="{{ site_name }}"
@@ -591,7 +590,7 @@
     </div>
 {% endif %}
 <div class="menu-left"
-     style="position: fixed;top: 1cm; bottom: 1cm;left:0;background-color: #FFFFFF;border-right: solid 1.5mm #EEEEEE; width: 12.5%;">
+     style="position: fixed; overflow-y:scroll; overflow-x:hidden; top: 1cm; bottom: 1cm;left:0;background-color: #FFFFFF;border-right: solid 1.5mm #EEEEEE; width: 12.5%;">
 
 
     {% block nav2 %}
@@ -669,7 +668,8 @@
                         <span class="glyphicon glyphicon-log-out"></span>&nbsp;&nbsp;Log Out
                     </a>
                 </li>
-
+                {% block sidebar %}
+                {% endblock %}
             </ul>
 
         {% endif %}

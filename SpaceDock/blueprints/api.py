@@ -623,8 +623,7 @@ def create_mod():
     test_game = Game.query.filter(Game.id == game).first()
     if not test_game:
         return { 'error': True, 'reason': 'Game does not exist.' }, 400
-    print(test_game)
-    test_gameversion = GameVersion.query.filter(GameVersion.game_id == test_game.id).first()
+    test_gameversion = GameVersion.query.filter(GameVersion.game_id == test_game.id).filter(GameVersion.friendly_version == game_version).first()
     if not test_gameversion:
         return { 'error': True, 'reason': 'Game version does not exist.' }, 400
     game_version_id = test_gameversion.id
@@ -742,7 +741,7 @@ def update_mod(mod_id):
 def add_tag(mod_id):
     tag = request.form.get('tag')
     if not tag:
-        return { 'error': True, 'reason': 'Tag is empty.' }, 401
+        return { 'error': True, 'reason': 'Tag is empty.' }, 400
     if not current_user:
         return { 'error': True, 'reason': 'You are not logged in.' }, 401
     mod = Mod.query.filter(Mod.id == mod_id).first()
@@ -761,6 +760,8 @@ def add_tag(mod_id):
         if not new_tag in mod.tags:
             print("add tag")
             new_tag.mods.append(mod)
+        else:
+            return { 'error': False, 'reason': 'This mod already has this tag!' }, 401
     else:
         new_tag = Tag(tag.lower())
         db.add(new_tag)
@@ -768,4 +769,4 @@ def add_tag(mod_id):
         db.commit()
         mod.tags.append(new_tag)
     db.commit()
-    return { 'url': url_for("mods.mod", id=mod.id, mod_name=mod.name) }
+    return { 'error': False, 'reason': 'Tag added correctly.', 'length': len(new_tag.mods), 'mod_id': mod.id }, 200
