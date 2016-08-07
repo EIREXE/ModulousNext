@@ -62,6 +62,7 @@ def search_mods(ga, text, page, limit):
         term = term.strip('\t\n\r')
         term = term.strip(' ')
         # Or
+        """
         if ' or ' in term:
             or_filter = list()
             # Split the or query by the or substring
@@ -70,7 +71,7 @@ def search_mods(ga, text, page, limit):
                 or_term = term.strip('\t\n\r')
                 tags_to_or = list()
                 # Find the tag in the database by it's name, the ilike here denotes case insensitvity
-                or_tag = Tag.query.filter(Tag.name.ilike(or_term)).first()
+                or_tag = Tag.query.(Tag.name.ilike(or_term)).first()
                 # If the tag exists add it to the filter
                 if or_tag:
                     or_filter.append(or_tag)
@@ -78,9 +79,10 @@ def search_mods(ga, text, page, limit):
                     filters.append(_or(*or_filter))
                     continue
                     # Order by score
-        elif term == "order by score":
+                    """
+        if term == "order by score":
             order_by_score = True
-            query = Image.query.filter(filters)
+            #query = Image.query.filter(filters)
         elif term.startswith("ver:"):
             filters.append(Mod.versions.any(ModVersion.gameversion.has(GameVersion.friendly_version == term[4:])))
         elif term.startswith("user:"):
@@ -99,7 +101,6 @@ def search_mods(ga, text, page, limit):
         else:
             filters.append(Mod.tags.any(name=term))
         print(term)
-
     ###
 
     """

@@ -484,6 +484,20 @@ def search_json(gameshort):
     mods = [e.serialize() for e in mods]
     return jsonify({"page":page, "total_pages": total_pages, "url":"/search", "name":"Search", "rss":"/browse/new.rss", "mods":mods})
 
+@anonymous.route("/json/search")
+def search_json_nogame():
+    query = request.args.get('query')
+    if not query:
+        query = ''
+    page = request.args.get('page')
+    if page:
+        page = int(page)
+    else:
+        page = 1
+    mods, total_pages = search_mods(None,query, page, 30)
+    mods = [e.serialize() for e in mods]
+    return jsonify({"page":page, "total_pages": total_pages, "url":"/search", "name":"Search", "rss":"/browse/new.rss", "mods":mods})
+
 @anonymous.route("/anniversary")
 def anniversary():
     user_count = User.query.count()
