@@ -84,18 +84,14 @@ def mod_rss(id, mod_name):
 @mods.route("/mod/<int:id>/<path:mod_name>")
 @with_session
 def mod(id, mod_name):
+
     games = Game.query.filter(Game.active == True).order_by(desc(Game.id)).all()
     if session.get('gameid'):
         if session['gameid']:
             ga = Game.query.filter(Game.id == session['gameid']).order_by(desc(Game.id)).first()
         else:
             ga = Game.query.filter(Game.short == 'melee').order_by(desc(Game.id)).first()
-    else:
-        ga = Game.query.filter(Game.short == 'melee').order_by(desc(Game.id)).first()
-    session['game'] = ga.id;
-    session['gamename'] = ga.name;
-    session['gameshort'] = ga.short;
-    session['gameid'] = ga.id;
+
     mod = Mod.query.filter(Mod.id == id).first()
     if not mod:
         abort(404)
@@ -109,6 +105,11 @@ def mod(id, mod_name):
             editable = True
     if not mod.published and not editable:
         abort(401)
+    ga = mod.game
+    session['game'] = ga.id;
+    session['gamename'] = ga.name;
+    session['gameshort'] = ga.short;
+    session['gameid'] = ga.id;
     latest = mod.default_version()
     referral = request.referrer
     if referral:
