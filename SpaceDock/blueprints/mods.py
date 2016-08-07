@@ -105,7 +105,9 @@ def mod(id, mod_name):
             editable = True
     if not mod.published and not editable:
         abort(401)
+    print(ga)
     ga = mod.game
+    print(ga)
     session['game'] = ga.id;
     session['gamename'] = ga.name;
     session['gameshort'] = ga.short;
