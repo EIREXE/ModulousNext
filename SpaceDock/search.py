@@ -3,7 +3,8 @@ from SpaceDock.database import db
 from SpaceDock.config import _cfg
 from sqlalchemy import or_, and_, desc
 from flask import session
-
+import html
+from urllib.parse import unquote
 import math
 
 from datetime import datetime
@@ -50,9 +51,58 @@ def weigh_result(result, terms):
     return score
 
 def search_mods(ga, text, page, limit):
-    terms = text.split(' ')
+    ###
+    text = unquote(text)
     query = db.query(Mod).join(Mod.user).join(Mod.versions).join(Mod.game)
     filters = list()
+    terms = text.strip('\t\n\r').lower().split(',')
+    order_by_score = False
+    for term in terms:
+        # Trim the sides of the search query
+        term = term.strip('\t\n\r')
+        term = term.strip(' ')
+        # Or
+        if ' or ' in term:
+            or_filter = list()
+            # Split the or query by the or substring
+            or_terms = term.split(' or ')
+            for or_term in or_terms:
+                or_term = term.strip('\t\n\r')
+                tags_to_or = list()
+                # Find the tag in the database by it's name, the ilike here denotes case insensitvity
+                or_tag = Tag.query.filter(Tag.name.ilike(or_term)).first()
+                # If the tag exists add it to the filter
+                if or_tag:
+                    or_filter.append(or_tag)
+                    # Make all tag filters into an or filter a  nd add it to the global filter
+                    filters.append(_or(*or_filter))
+                    continue
+                    # Order by score
+        elif term == "order by score":
+            order_by_score = True
+            query = Image.query.filter(filters)
+        elif term.startswith("ver:"):
+            filters.append(Mod.versions.any(ModVersion.gameversion.has(GameVersion.friendly_version == term[4:])))
+        elif term.startswith("user:"):
+
+            filters.append(User.username.ilike(term[5:]))
+        elif term.startswith("game:"):
+            filters.append(Mod.game_id == int(term[5:]))
+        elif term.startswith("downloads:>"):
+            filters.append(Mod.download_count > int(term[11:]))
+        elif term.startswith("downloads:<"):
+            filters.append(Mod.download_count < int(term[11:]))
+        elif term.startswith("followers:>"):
+            filters.append(Mod.follower_count > int(term[11:]))
+        elif term.startswith("followers:<"):
+            filters.append(Mod.follower_count < int(term[11:]))
+        else:
+            filters.append(Mod.tags.any(name=term))
+        print(term)
+
+    ###
+
+    """
     for term in terms:
         if term.startswith("ver:"):
             filters.append(Mod.versions.any(ModVersion.gameversion.has(GameVersion.friendly_version == term[4:])))
@@ -71,13 +121,14 @@ def search_mods(ga, text, page, limit):
         else:
             filters.append(Mod.name.ilike('%' + term + '%'))
             filters.append(User.username.ilike('%' + term + '%'))
-            filters.append(Mod.short_description.ilike('%' + term + '%'))
+            filters.append(Mod.short_description.ilike('%' + term + '%'))"""
     if ga:
         query = query.filter(Mod.game_id == ga.id)
-    query = query.filter(or_(*filters))
+    query = query.filter(and_(*filters))
     query = query.filter(Mod.published == True)
     query = query.order_by(desc(Mod.follower_count)) # We'll do a more sophisticated narrowing down of this in a moment
     total = math.ceil(query.count() / limit)
+    print(str(query))
     if page > total:
         page = total
     if page < 1:

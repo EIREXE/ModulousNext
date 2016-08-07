@@ -39,9 +39,16 @@
             dataType: 'json', // Choosing a JSON datatype
           }).done(function(data){
             $.notify(data.reason, { position:"bottom center" }, "success");
-            $('#tags_location').prepend(
-"              <a href=\"\/api\/mod\/" + data.mod_id +"\/remove_tag\">X<\/a>\r\n\r\n              <a href=\"searchurl\">" + $("#new_tag").val() + "<\/a>\r\n               <span style=\"color: #a0a0a0;\">" + data.length + "<\/span>\r\n            <\/li>"
-            )
+            var template = $('<li class=\"tag-type-general\" name=\"tag.id\" id=\"tag.id\">\r\n\r\n        <a href=\"#\" onclick=\"removetag(tag.id); return false;\" id=\"tag-delete\">X<\/a>\r\n\r\n        <a href=\"\/ga.short\/search?query=tag.name\" id=\"tag-name\">tag.name<\/a>\r\n         <span id=\"tag-length\" style=\"color: #a0a0a0;\">{en(tag.mods)<\/span>\r\n      <\/li>')
+            template.attr('id', data.tag_id)
+            var name_node = template.children('#tag-name')
+            name_node.attr('href', '/{{ga.short}}/search?query=' + $("#new_tag").val())
+            var delete_node = template.children('#tag-delete')
+            delete_node.attr('onclick', 'removetag(' + data.tag_id + ')')
+            var count_node = template.children('#tag-length')
+            count_node.text(data.length)
+            name_node.text($("#new_tag").val())
+            $('#tag-sidebar').append(template)
           }).fail(function(data){
             var a_data = $.parseJSON(data.responseText)
             $.notify(a_data.reason, { position:"bottom center" }, "error");
@@ -55,7 +62,20 @@
    }
  });
 
-
+ function removetag(param){
+        $.ajax({ // ajax call starts
+          type: "POST",
+          url: "/api/mod/{{mod.id}}/remove_tag", // JQuery loads serverside.php
+          data: 'tag_id=' + param, // Send value of the clicked button
+          dataType: 'json', // Choosing a JSON datatype
+        }).done(function(data){
+          $.notify(data.reason, { position:"bottom center" }, "success");
+          $("#"+param).remove()
+        }).fail(function(data){
+          var a_data = $.parseJSON(data.responseText)
+          $.notify(a_data.reason, { position:"bottom center" }, "error");
+        })
+ }
  </script>
 {% endif %}
 {% endblock %}
@@ -396,7 +416,7 @@ window.thirty_days_ago = new Date({{ thirty_days_ago | tojson }});
 </div>
 
 </div>
-<div class="row">
+<div class="row"  style="margin-bottom: 2%">
   <div class="col-md-10">
 <div class="container">
   <div class="row">

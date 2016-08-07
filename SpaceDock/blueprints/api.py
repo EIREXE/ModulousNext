@@ -740,6 +740,12 @@ def update_mod(mod_id):
 @json_output
 def add_tag(mod_id):
     tag = request.form.get('tag')
+    forbidden_characters = ["\"", "<", ">", "&", ","]
+    for character in forbidden_characters:
+        print(character)
+        if character in tag:
+            print("a")
+            return { 'error': True, 'reason': 'Forbidden character in tag.' }, 400
     if not tag:
         return { 'error': True, 'reason': 'Tag is empty.' }, 400
     if not current_user:
@@ -761,12 +767,47 @@ def add_tag(mod_id):
             print("add tag")
             new_tag.mods.append(mod)
         else:
-            return { 'error': False, 'reason': 'This mod already has this tag!' }, 401
+            return { 'error': False, 'reason': 'This mod already has this tag!' }, 400
     else:
         new_tag = Tag(tag.lower())
         db.add(new_tag)
         db.flush()
         db.commit()
-        mod.tags.append(new_tag)
+        new_tag.mods.append(mod)
     db.commit()
-    return { 'error': False, 'reason': 'Tag added correctly.', 'length': len(new_tag.mods), 'mod_id': mod.id }, 200
+    return { 'error': False, 'reason': 'Tag added correctly.', 'length': len(new_tag.mods), 'mod_id': mod.id, 'tag_id': new_tag.id }, 200
+
+@api.route('/api/mod/<mod_id>/remove_tag', methods=['POST'])
+@json_output
+def remove_tag(mod_id):
+    tag = request.form.get('tag')
+    tag_id = request.form.get('tag_id')
+    if tag_id:
+        new_tag = Tag.query.filter(Tag.id == tag_id).first()
+    else:
+        new_tag = Tag.query.filter(Tag.name == tag.lower()).first()
+    if not new_tag:
+        return { 'error': True, 'reason': 'Tag is empty or does not exist.' }, 400
+    if not current_user:
+        return { 'error': True, 'reason': 'You are not logged in.' }, 401
+    mod = Mod.query.filter(Mod.id == mod_id).first()
+    if not mod:
+        return { 'error': True, 'reason': 'Mod not found.' }, 404
+    editable = False
+    if current_user:
+        if current_user.admin:
+            editable = True
+        if current_user.id == mod.user_id:
+            editable = True
+        if any([u.accepted and u.user == current_user for u in mod.shared_authors]):
+            editable = True
+
+    print(new_tag.name)
+    if new_tag:
+        print(mod.tags[0])
+        if mod in new_tag.mods:
+            new_tag.mods.remove(mod)
+    if len(new_tag.mods) <= 0:
+        db.delete(new_tag)
+    db.commit()
+    return { 'error': False, 'reason': 'Tag removed correctly.', 'length': len(new_tag.mods), 'mod_id': mod.id }, 200

@@ -458,6 +458,8 @@ def singlegame_search(gameshort):
         page = int(page)
     else:
         page = 1
+    print("asd")
+    print(query)
     mods, total_pages = search_mods(ga,query, page, 30)
     return render_template("browse-list.html", mods=mods, page=page, total_pages=total_pages, search=True, query=query,ga=ga, url="/search")
 

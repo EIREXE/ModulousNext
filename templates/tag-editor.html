@@ -1,12 +1,12 @@
 <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='tags.css') }}" />
 		<b style="font-size: 12px;">Tags</b>
-		<ul id="tag-sidebar">
+		<ul name="tag-sidebar" id="tag-sidebar">
       {% for tag in mod.tags %}
-      <li class="tag-type-general" name="tags_location" id="tags_location">
+<li class="tag-type-general" name="{{tag.id}}" id="{{tag.id}}">
         {% if editable %}
-        <a href="">X</a>
+        <a href="#" onclick="removetag({{tag.id}});return false;">X</a>
         {% endif %}
-        <a href="/{{ga.short}}/search?query={{tag.name}}">{{tag.name}}</a>
+        <a href="/{{ga.short}}/search?query={{tag.name|e}}">{{tag.name|e}}</a>
          <span style="color: #a0a0a0;">{{len(tag.mods)}}</span>
       </li>
       {% endfor %}
