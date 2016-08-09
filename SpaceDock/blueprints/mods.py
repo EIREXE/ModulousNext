@@ -95,8 +95,6 @@ def mod(id, mod_name):
     mod = Mod.query.filter(Mod.id == id).first()
     if not mod:
         abort(404)
-    if not mod or not ga:
-        abort(404)
     editable = False
     if current_user:
         if current_user.admin:
@@ -112,6 +110,8 @@ def mod(id, mod_name):
     session['gameid'] = ga.id;
     latest = mod.default_version()
     referral = request.referrer
+    if not mod or not ga:
+        abort(404)    
     if referral:
         host = urllib.parse.urlparse(referral).hostname
         event = ReferralEvent.query\
