@@ -482,7 +482,7 @@ def unfollow(mod_id):
     current_user.following = [m for m in current_user.following if m.id != int(mod_id)]
     return { "success": True }
 
-@mods.route('/feature/<int:mod_id>', methods=['POST'])
+@mods.route('/feature/<int:mod_id>', methods=['GET'])
 @adminrequired
 @json_output
 @with_session
