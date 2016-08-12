@@ -111,7 +111,7 @@ def mod(id, mod_name):
     latest = mod.default_version()
     referral = request.referrer
     if not mod or not ga:
-        abort(404)    
+        abort(404)
     if referral:
         host = urllib.parse.urlparse(referral).hostname
         event = ReferralEvent.query\
@@ -482,7 +482,7 @@ def unfollow(mod_id):
     current_user.following = [m for m in current_user.following if m.id != int(mod_id)]
     return { "success": True }
 
-@mods.route('/mod/<int:mod_id>/feature', methods=['POST'])
+@mods.route('/feature/<int:mod_id>', methods=['POST'])
 @adminrequired
 @json_output
 @with_session
