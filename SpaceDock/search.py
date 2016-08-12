@@ -101,11 +101,9 @@ def search_mods(ga, text, page, limit):
             filters.append(Mod.follower_count < int(term[11:]))
         else:
             filters.append(Mod.tags.any(name=term))
-
-    for term in terms:
-        filters.append(Mod.name.ilike('%' + term + '%'))
-        filters.append(User.username.ilike('%' + term + '%'))
-        filters.append(Mod.short_description.ilike('%' + term + '%'))
+            filters.append(Mod.name.ilike('%' + term + '%'))
+            filters.append(User.username.ilike('%' + term + '%'))
+            filters.append(Mod.short_description.ilike('%' + term + '%'))
     if ga:
         query = query.filter(Mod.game_id == ga.id)
     query = query.filter(or_(*filters))
