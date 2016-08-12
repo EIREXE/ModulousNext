@@ -22,6 +22,7 @@ def view_profile(username):
     mods_created = sorted(user.mods, key=lambda mod: mod.created, reverse=True)
     if not current_user or current_user.id != user.id:
         mods_created = [mod for mod in mods_created if mod.published]
+    mods_created = mods_created[:30]
     mods_followed = sorted(user.following, key=lambda mod: mod.created, reverse=True)
     return render_template("view_profile.html", profile=user, mods_created=mods_created, mods_followed=mods_followed)
 
@@ -67,7 +68,7 @@ def profile(username):
         profile.showYoutubeName = request.form.get('showYoutubeName')
         profile.showTwitchName = request.form.get('showTwitchName')
         profile.showFacebookName = request.form.get('showFacebookName')
-        # Due to the Forum update, and the fact that IPS4 doesn't have an API like 
+        # Due to the Forum update, and the fact that IPS4 doesn't have an API like
         # vBullentin, we are removing this until we can adress it.
         # TODO(Thomas): Find a way to get the id of the User.
         # result = getForumId(profile.forumUsername)

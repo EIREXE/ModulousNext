@@ -29,7 +29,8 @@ def weigh_result(result, terms):
         if result.short_description.lower().count(term) != 0:
             short_matches += 1
             score += short_matches * 50
-
+        for term in (tag.name for tag in result.tags):
+            score += 1000
     score *= 100
 
     score += result.follower_count * 10
@@ -100,36 +101,17 @@ def search_mods(ga, text, page, limit):
             filters.append(Mod.follower_count < int(term[11:]))
         else:
             filters.append(Mod.tags.any(name=term))
-        print(term)
-    ###
 
-    """
     for term in terms:
-        if term.startswith("ver:"):
-            filters.append(Mod.versions.any(ModVersion.gameversion.has(GameVersion.friendly_version == term[4:])))
-        elif term.startswith("user:"):
-            filters.append(User.username == term[5:])
-        elif term.startswith("game:"):
-            filters.append(Mod.game_id == int(term[5:]))
-        elif term.startswith("downloads:>"):
-            filters.append(Mod.download_count > int(term[11:]))
-        elif term.startswith("downloads:<"):
-            filters.append(Mod.download_count < int(term[11:]))
-        elif term.startswith("followers:>"):
-            filters.append(Mod.follower_count > int(term[11:]))
-        elif term.startswith("followers:<"):
-            filters.append(Mod.follower_count < int(term[11:]))
-        else:
-            filters.append(Mod.name.ilike('%' + term + '%'))
-            filters.append(User.username.ilike('%' + term + '%'))
-            filters.append(Mod.short_description.ilike('%' + term + '%'))"""
+        filters.append(Mod.name.ilike('%' + term + '%'))
+        filters.append(User.username.ilike('%' + term + '%'))
+        filters.append(Mod.short_description.ilike('%' + term + '%'))
     if ga:
         query = query.filter(Mod.game_id == ga.id)
-    query = query.filter(and_(*filters))
+    query = query.filter(or_(*filters))
     query = query.filter(Mod.published == True)
     query = query.order_by(desc(Mod.follower_count)) # We'll do a more sophisticated narrowing down of this in a moment
     total = math.ceil(query.count() / limit)
-    print(str(query))
     if page > total:
         page = total
     if page < 1:

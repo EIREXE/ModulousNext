@@ -221,10 +221,18 @@
 </div>
 <div class="container">
     <div class="row">
-        {% for mod in profile.mods  %}
+        {% for mod in mods_created  %}
         {% include "mod-box.html" %}
         {% endfor %}
     </div>
+    {% if len(profile.mods) > 15 %}
+    <div class="morerow pull-right" style="margin-right: 2%">
+        <a href="/search?query=user:{{profile.username}}" class="btn btn-primary">
+            Browse more Mods by {{profile.username}}
+            <span class="glyphicon glyphicon-chevron-right"></span>
+        </a>
+    </div>
+    {% endif %}
 </div>
 {% endif %}
 
