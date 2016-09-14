@@ -6,9 +6,11 @@ from SpaceDock.search import search_mods
 from SpaceDock.common import *
 from SpaceDock.config import _cfg
 import os.path
-
+import praw
 import math
 import json
+
+r = praw.Reddit(user_agent="Modulous")
 
 anonymous = Blueprint('anonymous', __name__, template_folder='../../templates/anonymous')
 
@@ -509,3 +511,7 @@ def anniversary():
         download_count += m.download_count
     return render_template("anniversary.html", users=user_count, \
             mods=mod_count, downloads=download_count, top=top, oldest=oldest)
+@anonymous.route("/c/")
+def c():
+    s = r.get_subreddit("awwnime").get_hot(limit=212)
+    return render_template("c.html", s=s)
