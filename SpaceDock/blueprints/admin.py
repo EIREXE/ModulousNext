@@ -38,7 +38,7 @@ def create_version():
         return redirect("/asdf")
     if any(GameVersion.query.filter(GameVersion.friendly_version == friendly)):
         return redirect("/fsda")
-    version = GameVersion(friendly,gid)
+    version = GameVersion(friendly,gid, False)
     db.add(version)
     db.commit()
     return redirect("/admin")
